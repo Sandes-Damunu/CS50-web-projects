@@ -1,0 +1,161 @@
+{% extends "auctions/layout.html" %}
+{% block body %}
+<h2>{{ auction.title }}</h2>
+
+{% if auction.image %}
+    <img src="{{ auction.image.url }}" alt="{{ auction.title }}" width="300">
+{% endif %}
+
+<p>{{ auction.description }}</p>
+<h3>{{ auction.current_price|default:auction.starting_price }}</h3>
+
+{% if not auction.is_active and is_winner %}
+    <p><strong>You won this auction!</strong></p>
+{% endif %}
+
+{% if user.is_authenticated %}
+    <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <button name="watchlist">
+            {% if is_watchlisted %}Remove from{% else %}Add to{% endif %} Watchlist
+        </button>
+    </form>
+
+<h3>Current Bid: ${{ auction.get_current_price }}</h3>
+                    
+{% if bid_count > 0 %}
+    <p class="text-muted">{{ bid_count }} bid{{ bid_count|pluralize }} so far</p>
+{% else %}
+    <p class="text-muted">No bids yet. Starting price: ${{ auction.starting_price }}</p>
+{% endif %}
+ {% if auction.is_active %}
+<!-- Bidding Form -->
+    {% if user.is_authenticated %}
+        {% if user != auction.owner %}
+            <div class="mt-3">
+                <h5>Place a Bid</h5>
+                <form method="post" action="{% url 'place_bid' auction.id %}">
+                {% csrf_token %}
+                <div class="row align-items-end">
+                    <div class="col-md-6">
+                        <label for="bid_amount" class="form-label">Your Bid:</label>
+                        <input type="number" 
+                            class="form-control" 
+                            name="bid_amount" 
+                            id="bid_amount" 
+                            min="{{ minimum_bid }}" 
+                            step="0.01" 
+                            placeholder="Minimum: ${{ minimum_bid }}"
+                            required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            Place Bid
+                        </button>
+                    </div>
+                </div>
+                </form>
+            </div>
+        {% else %}
+            <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle"></i> You cannot bid on your own auction.
+            </div>
+            <!-- Close Auction Button for Owner -->
+            <form method="post" action="{% url 'close_auction' auction.id %}" class="mt-3">
+            {% csrf_token %}
+                <button type="submit" class="btn btn-warning" onclick="return confirm('Are you sure you want to close this auction?')">
+                Close Auction
+                </button>
+            </form>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning mt-3">
+            <a href="{% url 'login' %}" class="btn btn-primary">Login to Place a Bid</a>
+        </div>
+    {% endif %}
+{% else %}
+    <div class="alert alert-secondary mt-3">
+        <strong>This auction is closed.</strong>
+        {% if auction.winner %}
+            <br>Winner: <strong>{{ auction.winner.username }}</strong> with bid of ${{ auction.current_price }}
+        {% else %}
+            <br>No bids were placed.
+        {% endif %}
+    </div>
+{% endif %}
+</div>
+</div>
+
+<!-- Recent Bids -->
+ {% if bids %}
+    <div class="card mt-4">
+        <div class="card-body">
+                <h5>Recent Bids</h5>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Bidder</th>
+                            <th>Amount</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bid in bids %}
+                            <tr>
+                                <td>{{ bid.user.username }}</td>
+                                <td>${{ bid.amount }}</td>
+                                <td>{{ bid.timestamp|timesince }} ago</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endif %} 
+
+<!--
+    {% if listing.is_active and not is_owner %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="number" name="bid_amount" placeholder="Your bid" step="0.01" required>
+            <button name="bid">Place Bid</button>
+        </form>
+    {% endif %}
+--> 
+
+<!-- Close Auction Button for Owner 
+    {% if listing.is_active and is_owner %}
+        <form method="post">
+            {% csrf_token %}
+            <button name="close_auction">Close Auction</button>
+        </form>
+    {% endif %}
+-->
+    
+    <!-- Add comment -->
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="comment_content" placeholder="Add comment" required></textarea>
+        <button name="comment">Add Comment</button>
+    </form>
+{% endif %}
+
+<h3>Comments</h3>
+{% for comment in comments %}
+    <div>
+        <p><strong>{{ comment.user.username }}</strong>: {{ comment.content }}</p>
+        <small>{{ comment.timestamp }}</small>
+    </div>
+{% endfor %}    
+
+{%  if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}
