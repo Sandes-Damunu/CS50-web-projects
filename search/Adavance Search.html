@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Advanced Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #ebebeb;
+        }
+        
+        .header-left img {
+            height: 30px;
+        }
+        
+        .header-right a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: rgba(0,0,0,0.87);
+            font-size: 14px;
+        }
+        
+        .header-right a:hover {
+            text-decoration: underline;
+        }
+        
+        .advanced-search-title {
+            margin: 25px 35px;
+            font-size: 20px;
+            color: #d93025;
+        }
+        
+        .line {
+            border-bottom: 1px solid #ebebeb;
+        }
+        
+        .form-container {
+            margin: 40px 35px;
+        }
+        
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            width: 200px;
+            font-size: 13px;
+        }
+        
+        .form-input-container {
+            flex-grow: 1;
+            max-width: 500px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 5px 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 1px;
+            font-size: 13px;
+        }
+        
+        .form-input:focus {
+            border-color: #4d90fe;
+            outline: none;
+        }
+        
+        .form-description {
+            font-size: 12px;
+            color: #555;
+            margin-top: 5px;
+        }
+        
+        .form-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 30px;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        
+        .advanced-search-button {
+            background-color: #4d90fe;
+            border: 1px solid #3079ed;
+            border-radius: 2px;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        
+        .advanced-search-button:hover {
+            background-color: #357ae8;
+            border-color: #2f5bb7;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="index.html">
+                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo">
+            </a>
+        </div>
+        <div class="header-right">
+            <a href="index.html">Google Search</a>
+        </div>
+    </div>
+    
+    <div class="advanced-search-title">Advanced Search</div>
+    <div class="line"></div>
+    
+    <div class="form-container">
+        <div class="form-title">Find pages with...</div>
+        
+        <form action="https://google.com/search">
+            <div class="form-group">
+                <div class="form-label">all these words:</div>
+                <div class="form-input-container">
+                    <input type="text" name="as_q" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">this exact word or phrase:</div>
+                <div class="form-input-container">
+                    <input type="text" name="as_epq" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">any of these words:</div>
+                <div class="form-input-container">
+                    <input type="text" name="as_oq" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">none of these words:</div>
+                <div class="form-input-container">
+                    <input type="text" name="as_eq" class="form-input">
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <input type="submit" value="Advanced Search" class="advanced-search-button">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
