@@ -1,1 +1,0 @@
-Java is a powerful, general-purpose, object-oriented programming language that has been a cornerstone of software development since it was introduced by Sun Microsystems in 1995 (now owned by Oracle). It's known for its "write once, run anywhere" philosophy, meaning compiled Java code can run on any platform with a compatible Java Virtual Machine (JVM)
