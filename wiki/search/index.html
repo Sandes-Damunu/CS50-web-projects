@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>  
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search</title>
+        <style>
+            body{
+                font-family: sans-serif,Arial;
+                margin:0;
+                padding:0;
+                height:100vh;
+            }
+
+            .header{
+                display: flex;
+                justify-content: flex-end;
+                padding:15px;
+            }
+
+            .header a{
+                margin-left: 15px;
+                text-decoration: none;
+                color:rgba(0,0,0,0.87);
+                font-size: 14px;
+            }
+
+            .header a:hover{
+                text-decoration: underline;
+            }
+
+            .search{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 70vh;
+            }
+
+            .search-bar{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                max-width: 584px;
+            }   
+
+            .search-input{
+                width: 100%;
+                height: 44px;
+                border: 1px solid #dfe1e5;
+                border-radius: 24px;
+                padding: 0 20px;
+                font-size: 16px;
+                outline: none;
+                margin-bottom: 20px;
+            }
+
+            .search-input:hover, .search-input:focus{
+                box-shadow:0 1px 6px rgba(32,33,36,.28);
+                border-color:rgba(223,225,229,0);
+            }
+            .buttons{
+                display: flex;
+                justify-content: center;
+                gap:12px;
+            }
+
+            .button{
+                background-color: #f8f9fa;
+                border: 1px solid #f8f9fa;
+                border-radius: 4px;
+                color: #3c4043;
+                font-size: 14px;
+                padding: 10px 16px;
+                margin: 11px 4px;
+                cursor: pointer;
+            }
+
+            .button:hover {
+            box-shadow: 0 1px 1px rgba(0,0,0,.1);
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            color: #202124;
+            }
+
+            .logo {
+            margin-bottom: 20px;
+            }
+        
+            .logo img {
+                width: 272px;
+                height: 92px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <a href="Image Search.html">Image Search</a>
+            <a href="Adavance Search.html">Advance Search</a>
+        </div>
+
+        <div class="search">
+            <div class="logo">
+                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo">
+            </div>
+            <form action="https://google.com/search" class="search-bar">
+                <input type="text" name="q" class="search-input">
+                <div class="buttons">
+                    <input type="submit" value="Google Search" class="button">
+                    <input type="submit" value="I'm Feeeling Lucky" class="button">
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
