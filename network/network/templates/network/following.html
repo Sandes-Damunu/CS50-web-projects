@@ -1,0 +1,318 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="posts-container">
+        <h1>Following</h1>
+        <p class="subtitle">Posts from people you follow</p>
+        
+        {% if page_obj %}
+            {% for post in page_obj %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <h3 class="username">
+                            <a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a>
+                        </h3>
+                        {% if user == post.user %}
+                            <button class="edit-btn" onclick="editPost({{ post.id }})">Edit</button>
+                        {% endif %}
+                    </div>
+                    
+                    <div id="post-content-{{ post.id }}" class="post-content">
+                        {{ post.content }}
+                    </div>
+                    
+                    <div id="post-edit-{{ post.id }}" class="post-edit" style="display: none;">
+                        <textarea maxlength="280">{{ post.content }}</textarea>
+                        <div class="edit-buttons">
+                            <button onclick="saveEdit({{ post.id }})">Save</button>
+                            <button onclick="cancelEdit({{ post.id }})">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <div class="post-footer">
+                        <small class="timestamp">{{ post.timestamp|date:"M d, Y, g:i A" }}</small>
+                        <div class="post-actions">
+                            <button class="like-btn" onclick="toggleLike({{ post.id }})" 
+                                    data-liked="{% if user in post.likes.all %}true{% else %}false{% endif %}">
+                                <span id="like-icon-{{ post.id }}">
+                                    {% if user in post.likes.all %}❤️{% else %}🤍{% endif %}
+                                </span>
+                                <span id="like-count-{{ post.id }}">{{ post.like_count }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% endif %}
+                    
+                    {% for i in page_obj.paginator.page_range %}
+                        {% if page_obj.number == i %}
+                            <span class="current">{{ i }}</span>
+                        {% else %}
+                            <a href="?page={{ i }}">{{ i }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="no-posts">
+                <p>No posts from people you follow yet.</p>
+                <p><a href="{% url 'index' %}">Discover users to follow</a> by browsing all posts!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+
+        function toggleLike(postId) {
+            fetch(`/toggle_like/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const likeIcon = document.getElementById(`like-icon-${postId}`);
+                    const likeCount = document.getElementById(`like-count-${postId}`);
+                    
+                    likeIcon.textContent = data.liked ? '❤️' : '🤍';
+                    likeCount.textContent = data.like_count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function editPost(postId) {
+            document.getElementById(`post-content-${postId}`).style.display = 'none';
+            document.getElementById(`post-edit-${postId}`).style.display = 'block';
+        }
+
+        function cancelEdit(postId) {
+            document.getElementById(`post-content-${postId}`).style.display = 'block';
+            document.getElementById(`post-edit-${postId}`).style.display = 'none';
+        }
+
+        function saveEdit(postId) {
+            const textarea = document.querySelector(`#post-edit-${postId} textarea`);
+            const content = textarea.value.trim();
+
+            if (!content) {
+                alert('Post content cannot be empty.');
+                return;
+            }
+
+            fetch(`/edit_post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById(`post-content-${postId}`).textContent = data.content;
+                    cancelEdit(postId);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <style>
+        .posts-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .posts-container h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #657786;
+            margin-bottom: 25px;
+            font-size: 15px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .username a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .username a:hover {
+            text-decoration: underline;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            color: #1da1f2;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .post-content {
+            margin: 15px 0;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .post-edit {
+            margin: 15px 0;
+        }
+
+        .post-edit textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .edit-buttons {
+            margin-top: 10px;
+        }
+
+        .edit-buttons button {
+            background: #1da1f2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-right: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .comment-link {
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .comment-link:hover {
+            color: #1da1f2;
+        }
+
+        .no-posts {
+            text-align: center;
+            color: #666;
+            margin: 40px 0;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .no-posts a {
+            color: #1da1f2;
+            text-decoration: none;
+        }
+
+        .no-posts a:hover {
+            text-decoration: underline;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .pagination a, .pagination .current {
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #1da1f2;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .pagination .current {
+            background: #1da1f2;
+            color: white;
+        }
+    </style>
+{% endblock %}

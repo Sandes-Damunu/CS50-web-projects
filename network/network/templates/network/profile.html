@@ -1,0 +1,438 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-info">
+                <h1 class="profile-username">{{ profile_user.username }}</h1>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="followers-count">{{ followers_count }}</span>
+                        <span class="stat-label">Followers</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">{{ following_count }}</span>
+                        <span class="stat-label">Following</span>
+                    </div>
+                </div>
+            </div>
+            {% if user.is_authenticated and user != profile_user %}
+                <button id="follow-btn" 
+                        class="follow-btn {% if is_following %}following{% endif %}" 
+                        onclick="toggleFollow('{{ profile_user.username }}')">
+                    {% if is_following %}Unfollow{% else %}Follow{% endif %}
+                </button>
+            {% endif %}
+        </div>
+
+        <!-- User's Posts -->
+        <div class="posts-section">
+            <h2>Posts by {{ profile_user.username }}</h2>
+            
+            {% if page_obj %}
+                {% for post in page_obj %}
+                    <div class="post-card">
+                        <div class="post-header">
+                            <h3 class="username">{{ post.user.username }}</h3>
+                            {% if user == post.user %}
+                                <button class="edit-btn" onclick="editPost({{ post.id }})">Edit</button>
+                            {% endif %}
+                        </div>
+                        
+                        <div id="post-content-{{ post.id }}" class="post-content">
+                            {{ post.content }}
+                        </div>
+                        
+                        <div id="post-edit-{{ post.id }}" class="post-edit" style="display: none;">
+                            <textarea maxlength="280">{{ post.content }}</textarea>
+                            <div class="edit-buttons">
+                                <button onclick="saveEdit({{ post.id }})">Save</button>
+                                <button onclick="cancelEdit({{ post.id }})">Cancel</button>
+                            </div>
+                        </div>
+                        
+                        <div class="post-footer">
+                            <small class="timestamp">{{ post.timestamp|date:"M d, Y, g:i A" }}</small>
+                            <div class="post-actions">
+                                {% if user.is_authenticated %}
+                                    <button class="like-btn" onclick="toggleLike({{ post.id }})" 
+                                            data-liked="{% if user in post.likes.all %}true{% else %}false{% endif %}">
+                                        <span id="like-icon-{{ post.id }}">
+                                            {% if user in post.likes.all %}❤️{% else %}🤍{% endif %}
+                                        </span>
+                                        <span id="like-count-{{ post.id }}">{{ post.like_count }}</span>
+                                    </button>
+                                {% else %}
+                                    <span class="like-display">❤️ {{ post.like_count }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                    <div class="pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        {% endif %}
+                        
+                        {% for i in page_obj.paginator.page_range %}
+                            {% if page_obj.number == i %}
+                                <span class="current">{{ i }}</span>
+                            {% else %}
+                                <a href="?page={{ i }}">{{ i }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+            {% else %}
+                <div class="no-posts">
+                    <p>{{ profile_user.username }} hasn't posted anything yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+        }
+
+        function toggleFollow(username) {
+            fetch(`/toggle_follow/${username}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const followBtn = document.getElementById('follow-btn');
+                    const followersCount = document.getElementById('followers-count');
+                    
+                    if (data.is_following) {
+                        followBtn.textContent = 'Unfollow';
+                        followBtn.classList.add('following');
+                    } else {
+                        followBtn.textContent = 'Follow';
+                        followBtn.classList.remove('following');
+                    }
+                    
+                    followersCount.textContent = data.followers_count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function toggleLike(postId) {
+            fetch(`/toggle_like/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    const likeIcon = document.getElementById(`like-icon-${postId}`);
+                    const likeCount = document.getElementById(`like-count-${postId}`);
+                    
+                    likeIcon.textContent = data.liked ? '❤️' : '🤍';
+                    likeCount.textContent = data.like_count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function editPost(postId) {
+            document.getElementById(`post-content-${postId}`).style.display = 'none';
+            document.getElementById(`post-edit-${postId}`).style.display = 'block';
+        }
+
+        function cancelEdit(postId) {
+            document.getElementById(`post-content-${postId}`).style.display = 'block';
+            document.getElementById(`post-edit-${postId}`).style.display = 'none';
+        }
+
+        function saveEdit(postId) {
+            const textarea = document.querySelector(`#post-edit-${postId} textarea`);
+            const content = textarea.value.trim();
+
+            if (!content) {
+                alert('Post content cannot be empty.');
+                return;
+            }
+
+            fetch(`/edit_post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    content: content
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById(`post-content-${postId}`).textContent = data.content;
+                    cancelEdit(postId);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+
+    <style>
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-info h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 40px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 14px;
+            color: #657786;
+            margin-top: 4px;
+        }
+
+        .follow-btn {
+            background: #1da1f2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .follow-btn:hover {
+            background: #1991db;
+        }
+
+        .follow-btn.following {
+            background: white;
+            color: #1da1f2;
+            border: 1px solid #1da1f2;
+        }
+
+        .follow-btn.following:hover {
+            background: #ffebee;
+            color: #e53935;
+            border-color: #e53935;
+        }
+
+        .posts-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .edit-btn {
+            background: none;
+            border: none;
+            color: #1da1f2;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .post-content {
+            margin: 15px 0;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .post-edit {
+            margin: 15px 0;
+        }
+
+        .post-edit textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .edit-buttons {
+            margin-top: 10px;
+        }
+
+        .edit-buttons button {
+            background: #1da1f2;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-right: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .like-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .like-display, .comment-link {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .comment-link {
+            cursor: pointer;
+        }
+
+        .comment-link:hover {
+            color: #1da1f2;
+        }
+
+        .no-posts {
+            text-align: center;
+            color: #666;
+            margin: 40px 0;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .pagination a, .pagination .current {
+            padding: 8px 12px;
+            text-decoration: none;
+            color: #1da1f2;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .pagination .current {
+            background: #1da1f2;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .profile-stats {
+                gap: 30px;
+            }
+        }
+    </style>
+{% endblock %}
