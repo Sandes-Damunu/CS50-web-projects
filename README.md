@@ -10,11 +10,11 @@ This repository contains all my solutions and projects from the **CS50 Web** cou
 
 #### 🔍 Search
 Design a front-end for **Google Search**, **Google Image Search**, and **Google Advanced Search**.  
-[View Branch »](https://github.com/YourUserName/YourRepo/tree/web50/projects/2020/x/search)
+[View Branch »](https://github.com/Sandes-Damunu/CS50-web-projects/tree/main/search)
 
 #### 📝 Wiki
 Design a **Wikipedia-like online encyclopedia**.  
-[View Branch »](https://github.com/YourUserName/YourRepo/tree/web50/projects/2020/x/wiki)
+[View Branch »](https://github.com/Sandes-Damunu/CS50-web-projects/tree/main/wiki)
 
 #### 🛒 Commerce
 Create an **eBay-like e-commerce auction site** that lets users:
@@ -22,15 +22,15 @@ Create an **eBay-like e-commerce auction site** that lets users:
 * Place bids
 * Comment on listings
 * Add items to a watchlist  
-[View Branch »](https://github.com/YourUserName/YourRepo/tree/web50/projects/2020/x/commerce)
+[View Branch »](https://github.com/Sandes-Damunu/CS50-web-projects/tree/main/commerce)
 
 #### 📧 Mail
 Front-end for an email client that makes API calls to **send and receive emails**.  
-[View Branch »](https://github.com/YourUserName/YourRepo/tree/web50/projects/2020/x/mail)
+[View Branch »](https://github.com/Sandes-Damunu/CS50-web-projects/tree/main/mail)
 
 #### 🐦 Network
 A **Twitter-like social network** for posting updates and following users.  
-[View Branch »](https://github.com/YourUserName/YourRepo/tree/web50/projects/2020/x/network)
+[View Branch »](https://github.com/Sandes-Damunu/CS50-web-projects/tree/main/network)
 
 #### 🌟 Final Project
 My own original final project.  
