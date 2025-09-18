@@ -1,6 +1,6 @@
 # CS50's Web Programming with Python and JavaScript
 
-![CS50 Banner](https://example.com/path/to/image.png)
+![Thumbnail](https://mrfrk.com/wp-content/uploads/2025/08/thumbnail-1.webp)
 
 This repository contains all my solutions and projects from the **CS50 Web** course.
 
@@ -34,7 +34,7 @@ A **Twitter-like social network** for posting updates and following users.
 
 #### 🌟 Final Project
 My own original final project.  
-[View Project »](https://github.com/YourUserName/YourRepo/tree/main/final-project)
+[View Project »](https://github.com/Sandes-Damunu/CS50-web-Capstone-learning-management)
 
 ---
 
